@@ -6,6 +6,7 @@ import { ServeStaticModule } from '@nestjs/serve-static';
 import { JwtModule } from '@nestjs/jwt';
 import { AuthModule } from './auth/auth.module';
 import { MailModule } from './mail/mail.module';
+import { ProfileModule } from './profile/profile.module';
 
 @Module({
   imports: [
@@ -53,7 +54,8 @@ import { MailModule } from './mail/mail.module';
       }),
     }),
     AuthModule,
-    MailModule
+    MailModule,
+    ProfileModule
   ],
 })
 export class AppModule { }
