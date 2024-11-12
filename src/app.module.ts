@@ -4,6 +4,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { join } from 'path';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { JwtModule } from '@nestjs/jwt';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -50,6 +51,7 @@ import { JwtModule } from '@nestjs/jwt';
         signOptions: { expiresIn: '1h' },
       }),
     }),
+    AuthModule,
   ],
 })
 export class AppModule {}
