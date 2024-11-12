@@ -7,6 +7,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { AuthModule } from './auth/auth.module';
 import { MailModule } from './mail/mail.module';
 import { ProfileModule } from './profile/profile.module';
+import { WalletModule } from './wallet/wallet.module';
 
 @Module({
   imports: [
@@ -55,7 +56,8 @@ import { ProfileModule } from './profile/profile.module';
     }),
     AuthModule,
     MailModule,
-    ProfileModule
+    ProfileModule,
+    WalletModule
   ],
 })
 export class AppModule { }
