@@ -5,6 +5,7 @@ import { join } from 'path';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { JwtModule } from '@nestjs/jwt';
 import { AuthModule } from './auth/auth.module';
+import { MailModule } from './mail/mail.module';
 
 @Module({
   imports: [
@@ -14,9 +15,9 @@ import { AuthModule } from './auth/auth.module';
       renderPath: "/",
     }),
     ConfigModule.forRoot({
-      envFilePath: [`.env.stage.${process.env.STAGE}`],
+      envFilePath: [`.env.stage.${process.env.STAGE}`, '.env'],
+      isGlobal: true,
     }),
-
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule.forRoot({ isGlobal: true })],
       inject: [ConfigService],
@@ -47,11 +48,12 @@ import { AuthModule } from './auth/auth.module';
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: async (configService: ConfigService) => ({
-        secret: configService.get<string>('JWT_SECRET'), 
+        secret: configService.get<string>('JWT_SECRET'),
         signOptions: { expiresIn: '1h' },
       }),
     }),
     AuthModule,
+    MailModule
   ],
 })
-export class AppModule {}
+export class AppModule { }

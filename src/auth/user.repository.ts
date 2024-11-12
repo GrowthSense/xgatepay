@@ -7,11 +7,12 @@ import * as argon2 from "argon2";
 
 @CustomRepository(User)
 export class UserRepository extends Repository<User> {
-    async createUser(createUserSignUpDto: CreateUserSignUpDto, otp: string, pin: string): Promise<User> {
+    async createUser(createUserSignUpDto: CreateUserSignUpDto, otp: string, pin: string, publicKey:string, secretKey:string): Promise<User> {
         const { email, phonenumber } = createUserSignUpDto;
-        const hashedPin = await this.hashPin(pin)
+        const hashedPin = await this.hashPin(pin);
+        const hashedSecret=await argon2.hash(secretKey)
 
-        const user = this.create({ email, phonenumber, otp, pin: hashedPin });
+        const user = this.create({ email, phonenumber, otp, pin: hashedPin ,publicKey, secretKey});
         try {
             await this.save(user);
             return user;

@@ -1,4 +1,4 @@
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
 @Entity()
 export class User {
     @PrimaryGeneratedColumn('uuid')
@@ -30,6 +30,12 @@ export class User {
 
     @Column({ default: false })
     isVerified: boolean;
+
+    @Column()
+    publicKey: string
+
+    @Column()
+    secretKey: string
 
     @Column({ nullable: true })
     accessToken: string;
