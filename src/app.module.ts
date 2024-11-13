@@ -8,6 +8,7 @@ import { AuthModule } from './auth/auth.module';
 import { MailModule } from './mail/mail.module';
 import { ProfileModule } from './profile/profile.module';
 import { WalletModule } from './wallet/wallet.module';
+import { TradeModule } from './trade/trade.module';
 
 @Module({
   imports: [
@@ -57,7 +58,8 @@ import { WalletModule } from './wallet/wallet.module';
     AuthModule,
     MailModule,
     ProfileModule,
-    WalletModule
+    WalletModule,
+    TradeModule
   ],
 })
 export class AppModule { }
