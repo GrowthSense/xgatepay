@@ -1,6 +1,7 @@
-import { BadRequestException, Injectable, Logger } from '@nestjs/common';
-import StellarSdk, { Asset, BASE_FEE, Horizon, Keypair, Networks, Operation, TransactionBuilder } from '@stellar/stellar-sdk';
+import {  Injectable, Logger } from '@nestjs/common';
+import { Asset, BASE_FEE, Horizon, Keypair, Networks, Operation, TransactionBuilder } from '@stellar/stellar-sdk';
 import axios from 'axios';
+import { ProfileService } from 'src/profile/profile.service';
 
 @Injectable()
 export class TradeService {
@@ -9,10 +10,10 @@ export class TradeService {
   private server: Horizon.Server;
   private issuerKeypair: Keypair;
 
-  constructor() {
+  constructor(private profileService:ProfileService) {
     //const stellarNetwork = this.configService.get<string>('STELLAR_NETWORK') === 'TESTNEST'? Networks.PUBLIC: Networks.TESTNET;
 
-    this.server = new Horizon.Server('https://horizon-testnet.stellar.org');
+    this.server = new Horizon.Server('https://horizon-testnet.stellar.org')
 
   }
 
@@ -20,27 +21,24 @@ export class TradeService {
     sellingAssetCode: string,
     buyingAssetCode: string,
     amount: string,
-    price: string
+    price: string,
+    userId:string
   ) {
     const issuingKeypair = Keypair.fromSecret("SAUNM2GRWZNVVN7LXNXCJJJ4HNLSVHPRVS4SNF3TBKWU2TTREFMLYQ2O");
-    const traderKeypair = Keypair.fromSecret("SCZ5UDK4ZIMSFZPJ5FKEA7LSIGN6V4DUHV4OPFMG5JP6G2VJGC5M5TMQ");
+    //const traderKeypair = Keypair.fromSecret("SCZ5UDK4ZIMSFZPJ5FKEA7LSIGN6V4DUHV4OPFMG5JP6G2VJGC5M5TMQ");
 
-    // Define assets
+    const traderKeyPair=await this.profileService.getProfileById(userId)
+    const traderKeypair=Keypair.fromSecret(traderKeyPair.secretKey)
+
     const sellingAsset = sellingAssetCode === 'native'
       ? Asset.native()
       : new Asset(sellingAssetCode, issuingKeypair.publicKey());
     const buyingAsset = buyingAssetCode === 'native'
       ? Asset.native()
-      : new Asset(buyingAssetCode, traderKeypair.publicKey());
-
-    this.logger.log(`Selling Asset: Code - ${sellingAsset.getCode()}, Issuer - ${sellingAsset.getIssuer()}`);
-    this.logger.log(`Buying Asset: Code - ${buyingAsset.getCode()}, Issuer - ${buyingAsset.getIssuer()}`);
+      : new Asset(buyingAssetCode, issuingKeypair.publicKey());
 
     try {
-      // Load trader account from the Stellar network
       const traderAccount = await this.server.loadAccount(traderKeypair.publicKey());
-
-      // Build the transaction
       const transaction = new TransactionBuilder(traderAccount, {
         fee: BASE_FEE,
         networkPassphrase: Networks.TESTNET,
@@ -53,18 +51,11 @@ export class TradeService {
         }))
         .setTimeout(30)
         .build();
-
-      // Sign transaction with the trader's keypair
       transaction.sign(traderKeypair);
-
-      // Submit the transaction to the Stellar network
       const result = await this.server.submitTransaction(transaction);
-
-      this.logger.log('Offer created successfully', result);
       return result;
     } catch (error) {
       if (axios.isAxiosError(error) && error.response) {
-        // Log Stellar's response error data for more details
         this.logger.error('Failed to create offer', error.response.data);
       } else {
         this.logger.error('Failed to create offer', error.message);
@@ -89,5 +80,26 @@ export class TradeService {
       throw error;
     }
   }
+
+  // async getAllAssets() {
+  //   try {
+  //     const assets = await this.server.assets().call();
+  //     return assets.records
+  //   } catch (error) {
+  //     console.error('Error fetching all assets:', error);
+  //     return null;
+  //   }
+  // }
+
+  // async getAssetsByCode(assetCodes: string[]) {
+  //   try {
+  //     const assets = await this.server.assets().call();
+  //     console.log(assets)
+  //     return assets.records.filter(asset => assetCodes.includes(asset.asset_code));
+  //   } catch (error) {
+  //     console.error('Error fetching assets:', error);
+  //     return null;
+  //   }
+  // }
 
 }
