@@ -10,6 +10,7 @@ import { ProfileModule } from './profile/profile.module';
 import { WalletModule } from './wallet/wallet.module';
 import { TradeModule } from './trade/trade.module';
 import { TransactionModule } from './transaction/transaction.module';
+import { AssetModule } from './asset/asset.module';
 
 @Module({
   imports: [
@@ -61,7 +62,8 @@ import { TransactionModule } from './transaction/transaction.module';
     ProfileModule,
     WalletModule,
     TradeModule,
-    TransactionModule
+    TransactionModule,
+    AssetModule
   ],
 })
 export class AppModule { }
