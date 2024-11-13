@@ -1,10 +1,13 @@
-import { Body, Controller, Get,Param, Post } from '@nestjs/common';
+import { Body, Controller, Get,Param, Post, UseGuards } from '@nestjs/common';
 import { TransactionService } from './transaction.service';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { GetCurrentUserId } from 'src/decorators/get-current-user-id.decorators';
 
 @Controller('transaction')
 @ApiTags('Transactions')
+@ApiBearerAuth('bearer')
 export class TransactionController {
   constructor(private readonly transactionService: TransactionService) {}
 
@@ -15,8 +18,9 @@ export class TransactionController {
   }
 
   @Post('sendPayment')
-  async issueAsset(@Body() createTransactionDto: CreateTransactionDto) {
-    const { sourceSecretKey, amount, destinationPublicKey, sourcePublicKey } = createTransactionDto;
-    return await this.transactionService.sendPayment(sourceSecretKey, amount, destinationPublicKey, sourcePublicKey );
+  @UseGuards(JwtAuthGuard)
+  async issueAsset(@Body() createTransactionDto: CreateTransactionDto, @GetCurrentUserId() userId:string) {
+    const {destinationPublicKey,amount } = createTransactionDto;
+    return await this.transactionService.sendPayment(destinationPublicKey,amount,userId );
   }
 }
