@@ -1,7 +1,6 @@
-
 import { BadRequestException, Injectable } from '@nestjs/common';
 import StellarSdk,{ Keypair } from '@stellar/stellar-sdk';
-
+import fetch from 'node-fetch'
 
 @Injectable()
 export class WalletService {
@@ -9,9 +8,10 @@ export class WalletService {
 
 
   async fundWallet(publicKey:string){
-    const friendBotUrl=`https://friendbot.stellar.org?addr=${encodeURIComponent(publicKey)}`;
+   
     try {
-      await fetch(friendBotUrl)
+      const friendBotUrl= await fetch(`https://friendbot.stellar.org?addr=${encodeURIComponent(publicKey)}`);
+      console.log('friendbot', friendBotUrl)
       return "Wallet funded sucessfully"
     } catch (error) {
       throw new BadRequestException('Unable to fund the wallet')

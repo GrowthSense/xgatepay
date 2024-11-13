@@ -1,4 +1,6 @@
-import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import {  AssetEntity } from "src/asset/entities/asset.entity";
+import { Transaction } from "src/transaction/entities/transaction.entity";
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 @Entity()
 export class User {
     @PrimaryGeneratedColumn('uuid')
@@ -36,6 +38,12 @@ export class User {
 
     @Column()
     secretKey: string
+
+    @OneToMany(()=> AssetEntity, asset=>asset.user)
+    assets:AssetEntity[]
+
+    @OneToMany(()=>Transaction, transaction=>transaction.recipient)
+  transactions:Transaction[]
 
     @Column({ nullable: true })
     accessToken: string;

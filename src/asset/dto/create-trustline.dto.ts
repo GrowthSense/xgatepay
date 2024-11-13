@@ -1,23 +1,21 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { IsString } from "class-validator";
 
-export class CreateTransactionDto {
+export class CreateTrustlineDto {
     @IsString()
     @ApiProperty()
-    sourcePublicKey: string;
-    
-    @IsString()
-    @ApiProperty()
-    sourceSecretKey: string;
+    assetCode: string;
 
     @IsString()
     @ApiProperty()
-    destinationPublicKey: string;
-
+    recipientPublicKey: string;
 
     @IsString()
     @ApiProperty()
-    amount: string;
+    recipientSecretKey:string;
 
-   
-}
+    @IsString()
+    @ApiProperty()
+    issuerSecretKey: string;
+  }
+  
