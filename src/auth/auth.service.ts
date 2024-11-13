@@ -41,24 +41,34 @@ export class AuthService {
       throw new InternalServerErrorException('Error signing up user');
     }
   }
-  async signIn(loginAuthDto: LoginAuthDto) {
+
+  public async signIn(authLoginDto: LoginAuthDto) {
     try {
-      const user = await this.findByEmail(loginAuthDto.email);
-      await this.verifyPin(loginAuthDto.pin, user.pin);
-      if (user.isVerified !== true) {
-        throw new HttpException("User does not exist", HttpStatus.UNAUTHORIZED)
+      const user = await this.findByEmail(authLoginDto.email);
+  
+      const isPinValid = await this.verifyPin(authLoginDto.pin, user.pin);
+      if (!isPinValid) {
+        throw new HttpException("Wrong credentials provided", HttpStatus.BAD_REQUEST);
       }
-      user.pin = undefined;
+  
+      user.pin = undefined; // Hide the pin before returning user data
+  
       const payload = {
         userId: user.id,
-        cashtag: user.cashtag,
-        name: user.firstname + " " + user.lastname
+        email: user.email,
+        username: `${user.firstname} ${user.lastname}`,
       };
+  
       const refresh = await this.generateRefreshToken(user.id);
-
-      return { access_token: this.jwtService.sign(payload), refreshToken: refresh, user: user.id }
+  
+      return {
+        access_token: this.jwtService.sign(payload),
+        refreshToken: refresh,
+        userId: user.id,
+      };
     } catch (error) {
-      throw new HttpException("Wrong credentials", HttpStatus.BAD_REQUEST)
+      console.error(error);
+      throw new HttpException("Wrong Credentials", HttpStatus.BAD_REQUEST);
     }
   }
 
@@ -138,8 +148,15 @@ export class AuthService {
     await this.saveOrUpdateRefreshToken(refreshToken, userId, expiryDateString);
     return refreshToken;
   }
-  public async verifyPin(plainTextPin: string, hashedPin: string) {
-    const isPinMatching = await argon2.verify(plainTextPin, hashedPin);
-    if (!isPinMatching) throw new HttpException("Wrong credentials", HttpStatus.BAD_REQUEST)
+  
+ private async verifyPin(plainTextPin: string, hashedPin: string) {
+  try {
+    const isPasswordMatching = await argon2.verify(hashedPin, plainTextPin);
+    console.log(isPasswordMatching);
+
+    return isPasswordMatching; // Return the result so it can be used in the signIn function
+  } catch (error) {
+    throw new HttpException("Wrong credentials provided", HttpStatus.BAD_REQUEST);
   }
+}
 }
